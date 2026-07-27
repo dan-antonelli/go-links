@@ -38,6 +38,18 @@ GOLINKS_API_URL=http://golinks.internal:3000 npm run cli -- ls
 
 After `npm run build`, `npm link` gives you a global `golinks` command.
 
+## API
+
+```
+POST   /api/links        create {slug, url}
+GET    /api/links        list
+GET    /:slug            302 redirect
+DELETE /api/links/:slug  remove
+GET    /health           liveness
+```
+
+Full spec in `openapi.yaml`.
+
 ## Assumptions
 
 - Single instance, single process. No multi-instance coordination.
