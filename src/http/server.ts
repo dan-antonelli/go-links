@@ -56,6 +56,10 @@ app.get('/health', async (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
 });
 
+app.get('/', async (_req: Request, res: Response) => {
+  res.status(200).type('text/plain').send('go-links: POST /api/links to create a link');
+});
+
 app.get('/:slug', async (req: Request, res: Response) => {
   const slug = req.params.slug as string;
   const link = linkService.resolveLink(slug);
