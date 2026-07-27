@@ -54,7 +54,6 @@ First iteration, not a finished product. Cut on purpose, to move fast:
 - No web UI. API and CLI only.
 - No Docker, no CI.
 - Console OTel exporter. Traces and metrics print to stdout, nothing shipped to a collector.
-- Pinned `brace-expansion` via npm overrides to patch a transitive advisory pulled in by the OTel GCP resource detector.
 
 ## If I had another day
 
@@ -66,6 +65,6 @@ First iteration, not a finished product. Cut on purpose, to move fast:
 
 ## Observability
 
-- Traces: auto-instrumentation for `http` and `express`, printed via `ConsoleSpanExporter`. Set `OTEL_SERVICE_NAME=golinks` so traces show a real service name instead of the SDK default.
+- Traces: instrumentation scoped to `http` and `express` only, printed via `ConsoleSpanExporter`. No runtime metrics (v8, event loop, heap) and no cloud resource detectors, just request spans. Set `OTEL_SERVICE_NAME=golinks` so traces show a real service name instead of the SDK default.
 - Metrics: two counters, `golinks.redirects` and `golinks.links.created`, exported every 10s via `ConsoleMetricExporter`.
 - Logs: structured pino JSON. Every request gets a `requestId` (from `x-request-id` header, or generated), echoed in the response header and in every error body, so you can trace a client error back to server logs and spans.

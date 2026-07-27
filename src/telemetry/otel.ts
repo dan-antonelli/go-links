@@ -1,7 +1,8 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
 import { PeriodicExportingMetricReader, ConsoleMetricExporter } from '@opentelemetry/sdk-metrics';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { metrics } from '@opentelemetry/api';
 
 const sdk = new NodeSDK({
@@ -12,7 +13,7 @@ const sdk = new NodeSDK({
       exportIntervalMillis: 10000,
     }),
   ],
-  instrumentations: [getNodeAutoInstrumentations()],
+  instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()],
 });
 
 sdk.start();
