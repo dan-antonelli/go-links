@@ -10,7 +10,7 @@ interface Link {
 
 const baseUrl = process.env.GOLINKS_API_URL ?? 'http://localhost:3000';
 
-async function apiRequest(path: string, init?: RequestInit): Promise<any> {
+async function apiRequest<T>(path: string, init?: RequestInit): Promise<T | undefined> {
   const res = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
@@ -24,7 +24,7 @@ async function apiRequest(path: string, init?: RequestInit): Promise<any> {
     return undefined;
   }
 
-  return res.status === 204 ? undefined : res.json();
+  return res.status === 204 ? undefined : ((await res.json()) as T);
 }
 
 const program = new Command();
@@ -34,7 +34,7 @@ program
   .command('add <slug> <url>')
   .description('Create a new go link')
   .action(async (slug: string, url: string) => {
-    const result = await apiRequest('/api/links', {
+    const result = await apiRequest<{ link: Link }>('/api/links', {
       method: 'POST',
       body: JSON.stringify({ slug, url }),
     });
@@ -47,7 +47,7 @@ program
   .command('ls')
   .description('List all go links')
   .action(async () => {
-    const result = await apiRequest('/api/links');
+    const result = await apiRequest<{ links: Link[] }>('/api/links');
     if (!result) return;
     if (result.links.length === 0) {
       console.log('No links yet.');
