@@ -1,0 +1,190 @@
+openapi: 3.1.0
+info:
+  title: go-links API
+  description: Internal go-links redirector.
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /api/links:
+    post:
+      summary: Create a go link
+      operationId: createLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLinkRequest'
+            example:
+              slug: docs
+              url: https://example.com/docs
+      responses:
+        '201':
+          description: Link created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [link]
+                properties:
+                  link:
+                    $ref: '#/components/schemas/Link'
+              example:
+                link:
+                  slug: docs
+                  url: https://example.com/docs
+                  createdAt: '2026-07-27T12:00:00.000Z'
+                  hits: 0
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: 'slug must match ^[a-z0-9-]+$'
+                requestId: 3f9a2b3e-...
+        '409':
+          description: Slug already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: link with slug "docs" already exists
+                requestId: 3f9a2b3e-...
+    get:
+      summary: List go links
+      operationId: listLinks
+      responses:
+        '200':
+          description: List of go links
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [links]
+                properties:
+                  links:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Link'
+              example:
+                links:
+                  - slug: docs
+                    url: https://example.com/docs
+                    createdAt: '2026-07-27T12:00:00.000Z'
+                    hits: 3
+
+  /api/links/{slug}:
+    delete:
+      summary: Delete a link
+      operationId: deleteLink
+      parameters:
+        - $ref: '#/components/parameters/SlugParam'
+      responses:
+        '204':
+          description: Link deleted
+        '404':
+          description: Slug not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: no link found for slug "docs"
+                requestId: 3f9a2b3e-...
+
+  /health:
+    get:
+      summary: Health check
+      operationId: health
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+              example:
+                status: ok
+
+  /{slug}:
+    get:
+      summary: Redirect to a go link's url
+      operationId: resolveLink
+      parameters:
+        - $ref: '#/components/parameters/SlugParam'
+      responses:
+        '302':
+          description: Redirect
+          headers:
+            Location:
+              description: Target url
+              schema:
+                type: string
+                format: uri
+        '404':
+          description: Slug not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: no link found for slug "docs"
+                requestId: 3f9a2b3e-...
+
+components:
+  parameters:
+    SlugParam:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: ^[a-z0-9-]+$
+      example: docs
+
+  schemas:
+    Link:
+      type: object
+      required: [slug, url, createdAt, hits]
+      properties:
+        slug:
+          type: string
+          pattern: ^[a-z0-9-]+$
+        url:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        hits:
+          type: integer
+          minimum: 0
+
+    CreateLinkRequest:
+      type: object
+      required: [slug, url]
+      properties:
+        slug:
+          type: string
+          pattern: ^[a-z0-9-]+$
+        url:
+          type: string
+          format: uri
+
+    ErrorResponse:
+      type: object
+      required: [error, requestId]
+      properties:
+        error:
+          type: string
+        requestId:
+          type: string
