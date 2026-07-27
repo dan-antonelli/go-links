@@ -54,6 +54,7 @@ First iteration, not a finished product. Cut on purpose, to move fast:
 - No web UI. API and CLI only.
 - No Docker, no CI.
 - Console OTel exporter. Traces and metrics print to stdout, nothing shipped to a collector.
+- Pinned `brace-expansion` via npm overrides to patch a transitive advisory pulled in by the OTel GCP resource detector.
 
 ## If I had another day
 
